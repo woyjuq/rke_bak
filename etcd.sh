@@ -6,13 +6,9 @@
 # set -o pipefail: 管道中任意命令失败，整个管道视为失败
 set -euo pipefail
 
-### --- 配置区 --- ###
-# 备份存放路径 (!!! 请使用绝对路径, '~/backup' 在 cron 中不可靠)
 BACKUP_PATH="/opt/rancher-backups"
 # 备份保留天数
 RETENTION_DAYS=7
-# 通过 docker 镜像名自动查找 Rancher 容器名
-# (这是 Rancher 单点 Docker 安装的默认镜像名)
 RANCHER_IMAGE_NAME="rancher/rancher"
 ### --- 配置区结束 --- ###
 
@@ -31,10 +27,6 @@ if [ -z "$RANCHER_CONTAINER_NAME" ]; then
 fi
 log "找到 Rancher 容器: $RANCHER_CONTAINER_NAME"
 
-# --- 关键：注册清理函数 ---
-# 'trap' 会捕获脚本的退出信号 (EXIT)，无论脚本是成功、失败还是被中断
-# 它都会执行 'cleanup' 函数。
-# 这是防止 Rancher 永久宕机的核心保障。
 cleanup() {
   log "--- 正在执行清理/重启任务 ---"
   # 检查容器是否存在且处于停止状态
